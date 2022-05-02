@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,17 +66,25 @@ public class LoadData {
 					String year = lineColumns.length > 0 ? lineColumns[YEAR] : null;
 					String title = lineColumns.length > 1 ? lineColumns[TITLE] : "";
 					String studios = lineColumns.length > 2 ? lineColumns[STUDIOS] : "";
-					String producers = lineColumns.length > 3 ? lineColumns[PRODUCERS] : "";
+					String producersFromLine = lineColumns.length > 3 ? lineColumns[PRODUCERS] : "";
 					String winner = lineColumns.length > 4 ? lineColumns[WINNER] : "no";
 					
-					Movies movie = new Movies();
-					movie.setYear(year != null ? Integer.parseInt(lineColumns[YEAR]) : null);
-					movie.setTitle(title);
-					movie.setStudios(studios);
-					movie.setProducers(producers);
-					movie.setWinner("yes".equalsIgnoreCase(winner));
-					moviesRepository.save(movie);
+					List<String> listProducers = new ArrayList<String>();
+					if(producersFromLine.toUpperCase().contains("AND") || producersFromLine.contains(",") && !splitProducers(producersFromLine).isEmpty()) {
+						listProducers.addAll(splitProducers(producersFromLine));
+					}else {
+						listProducers.add(producersFromLine);
+					}
 					
+					for (String producer : listProducers) {
+						Movies movie = new Movies();
+						movie.setYear(year != null ? Integer.parseInt(lineColumns[YEAR]) : null);
+						movie.setTitle(title);
+						movie.setStudios(studios);
+						movie.setProducers(producer);
+						movie.setWinner("yes".equalsIgnoreCase(winner));
+						moviesRepository.save(movie);
+					}					
 					linha++;
 				}catch(Exception e) {
 					log.error("Ocorreu um erro ao importar a linha "+ linha + ", a mesma será desconsiderada!");
@@ -82,5 +93,14 @@ public class LoadData {
 		}catch (IOException e) {
 			throw new IllegalStateException("O arquivo não pode ser aberto!");
 		}
-	}	
+	}
+	
+	private List<String> splitProducers(String producers){
+		List<String> listProducers = new LinkedList<String>();
+		String[] produc = producers.split("(,)|(AND)|(and)");
+		for (String string : produc) {
+			listProducers.add(string.trim());
+		}
+		return listProducers;
+	}
 }
