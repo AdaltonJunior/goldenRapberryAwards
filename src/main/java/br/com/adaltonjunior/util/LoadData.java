@@ -70,7 +70,7 @@ public class LoadData {
 					String winner = lineColumns.length > 4 ? lineColumns[WINNER] : "no";
 					
 					List<String> listProducers = new ArrayList<String>();
-					if(producersFromLine.toUpperCase().contains("AND") || producersFromLine.contains(",") && !splitProducers(producersFromLine).isEmpty()) {
+					if((producersFromLine.toUpperCase().contains("AND") || producersFromLine.contains(",")) && !splitProducers(producersFromLine).isEmpty()) {
 						listProducers.addAll(splitProducers(producersFromLine));
 					}else {
 						listProducers.add(producersFromLine);
